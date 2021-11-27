@@ -152,6 +152,31 @@ app.post('/api/candidate', ({ body }, res) => {
     });
 });
 
+// UPDATE a candidate's party
+app.put('/api/candidate/:id', (req, res) => {
+    const errors = inputCheck(req.body, 'party_id');
+    if (errors) {
+        res.status(400).json({ error: errors });
+        return;
+    }
+
+    const sql = `UPDATE candidates SET party_id = ?
+                WHERE id = ?`;
+    const params = [req.body.party_id, req.params.id];
+    db.query(sql, params, (err, result) => {
+        if (err) {
+            res.status(400).json({ error: err.message });
+        } else if (!result.affectedRows) {
+            res.json({ message: 'Candidate not found.' });
+        } else {
+            res.json({
+                message: "Successfully updated candidate's party.",
+                data: req.body,
+                changes: result.affectedRows
+            });
+        }
+    });
+});
 
 // default response for requests that are not found
 app.use((req, res) => {
